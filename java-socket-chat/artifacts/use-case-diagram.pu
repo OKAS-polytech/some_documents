@@ -1,0 +1,11 @@
+@startuml
+left to right direction
+actor User
+
+rectangle "Chat System" {
+  User -- (Connect to Server)
+  User -- (Set Nickname)
+  User -- (Send Message)
+  User -- (Receive Message)
+}
+@enduml

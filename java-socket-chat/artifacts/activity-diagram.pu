@@ -1,0 +1,18 @@
+@startuml
+start
+:Client starts;
+:Connect to server;
+if (Connection successful?) then (yes)
+  :Set nickname;
+  fork
+    :Read user input;
+    :Send message to server;
+  fork again
+    :Receive message from server;
+    :Display message;
+  end fork
+else (no)
+  :Display error message;
+endif
+stop
+@enduml

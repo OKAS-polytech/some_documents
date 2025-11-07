@@ -1,0 +1,31 @@
+@startuml
+class ChatServer {
+  - serverSocket: ServerSocket
+  - clientHandlers: List<ClientHandler>
+  + start(port: int): void
+  + broadcastMessage(message: String, sender: ClientHandler): void
+  + removeClient(clientHandler: ClientHandler): void
+}
+
+class ClientHandler implements Runnable {
+  - socket: Socket
+  - server: ChatServer
+  - in: BufferedReader
+  - out: PrintWriter
+  - nickname: String
+  + run(): void
+  + sendMessage(message: String): void
+}
+
+class ChatClient {
+  - socket: Socket
+  - in: BufferedReader
+  - out: PrintWriter
+  + start(host: String, port: int): void
+  - sendMessage(): void
+  - receiveMessage(): void
+}
+
+ChatServer "1" *-- "0..*" ClientHandler : manages
+ClientHandler ..> ChatServer : notifies
+@enduml

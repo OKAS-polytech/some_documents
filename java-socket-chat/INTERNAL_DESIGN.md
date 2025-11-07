@@ -1,0 +1,41 @@
+# Internal Design Document
+
+## 1. Class Structure
+The application is composed of three main classes: `ChatServer`, `ClientHandler`, and `ChatClient`.
+
+### 1.1. `ChatServer` Class
+- **Purpose**: Manages the server-side operations, including listening for client connections and maintaining a list of connected clients.
+- **Key Attributes**:
+  - `serverSocket`: A `ServerSocket` to accept client connections.
+  - `clientHandlers`: A list to store `ClientHandler` instances for each connected client.
+- **Key Methods**:
+  - `start(port)`: Starts the server on a specified port. It enters an infinite loop to accept new client connections.
+  - `broadcastMessage(message, sender)`: Sends a message to all connected clients except the original sender.
+  - `removeClient(clientHandler)`: Removes a client from the list when they disconnect.
+
+### 1.2. `ClientHandler` Class (implements `Runnable`)
+- **Purpose**: A dedicated thread to handle communication with a single client. It reads messages from the client and passes them to the server for broadcasting.
+- **Key Attributes**:
+  - `socket`: The `Socket` connected to the client.
+  - `server`: A reference to the `ChatServer` instance.
+  - `in`: A `BufferedReader` to read messages from the client.
+  - `out`: A `PrintWriter` to send messages to the client.
+  - `nickname`: The client's chosen nickname.
+- **Key Methods**:
+  - `run()`: The main logic of the thread. It reads the client's nickname and then continuously listens for incoming messages until the client disconnects.
+  - `sendMessage(message)`: Sends a message to the client.
+
+### 1.3. `ChatClient` Class
+- **Purpose**: Manages the client-side operations, including connecting to the server, sending user input, and receiving messages.
+- **Key Attributes**:
+  - `socket`: The `Socket` for connecting to the server.
+  - `in`: A `BufferedReader` to read messages from the server.
+  - `out`: A `PrintWriter` to send messages to the server.
+- **Key Methods**:
+  - `start(host, port)`: Connects to the server and starts two threads: one for reading user input from the console and another for reading messages from the server.
+  - `sendMessage()`: A method run in a thread to read console input and send it to the server.
+  - `receiveMessage()`: A method run in a thread to read messages from the server and display them on the console.
+
+## 2. Threading Model
+- The `ChatServer` creates a new `ClientHandler` thread for each client that connects. This allows the server to handle multiple clients concurrently.
+- The `ChatClient` uses two threads: one for the main application flow and sending messages, and a separate thread to continuously listen for and display incoming messages from the server without blocking user input.

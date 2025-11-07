@@ -1,0 +1,28 @@
+# Requirements Definition
+
+## 1. Overview
+This document defines the requirements for the "CUI chat application using Java socket communication".
+
+## 2. Purpose
+The purpose of this application is to develop a simple CUI-based chat application for learning Java's socket communication features.
+
+## 3. Functional Requirements
+- The server and client must be able to communicate in a one-to-many fashion.
+- Multiple clients must be able to connect to the server.
+- Clients must be able to send messages to the server.
+- The server must broadcast received messages to all clients except the sender.
+- Clients must display messages received from the server on the console.
+- Clients must be able to set a nickname.
+
+## 4. Non-functional Requirements
+- OS: Must run on Windows, macOS, or Linux.
+- Execution Environment: Java Development Kit (JDK) 8 or higher must be installed.
+- Must operate via CUI (Character User Interface).
+
+## 5. Deliverables
+- Requirements Definition (this document)
+- External Design Document
+- Internal Design Document
+- Manual
+- UML Diagrams (Use Case, Sequence, Activity, Class)
+- Source Code

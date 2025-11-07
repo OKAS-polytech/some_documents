@@ -1,0 +1,16 @@
+@startuml
+autonumber
+actor User
+participant Client1
+participant Server
+participant ClientHandler1
+participant Client2
+participant ClientHandler2
+
+User -> Client1: Input message
+Client1 -> Server: Send message
+Server -> ClientHandler1: Forward message
+ClientHandler1 -> ClientHandler2: Broadcast message
+ClientHandler2 -> Client2: Display message
+Client2 -> User: Show message
+@enduml
