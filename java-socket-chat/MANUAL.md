@@ -1,47 +1,47 @@
-# Manual
+# 手順書
 
-## 1. Prerequisites
-- Java Development Kit (JDK) 8 or higher must be installed.
-- You can verify the installation by running `java -version` and `javac -version` in your terminal.
+## 1. 前提条件
+- Java Development Kit (JDK) 8以上がインストールされていること。
+- ターミナルで `java -version` および `javac -version` を実行して、インストールを確認できます。
 
-## 2. How to Compile
-1. Open a terminal or command prompt.
-2. Navigate to the `src` directory inside the `java-socket-chat` project folder.
+## 2. コンパイル方法
+1. ターミナルまたはコマンドプロンプトを開きます。
+2. `java-socket-chat` プロジェクトフォルダ内の `src` ディレクトリに移動します。
    ```sh
    cd java-socket-chat/src
    ```
-3. Compile all the Java source files.
+3. すべてのJavaソースファイルをコンパイルします。
    ```sh
    javac *.java
    ```
-This will generate `.class` files for each `.java` file in the `src` directory.
+   これにより、`src` ディレクトリ内の各 `.java` ファイルに対応する `.class` ファイルが生成されます。
 
-## 3. How to Run the Application
+## 3. アプリケーションの実行方法
 
-### 3.1. Start the Server
-1. In the terminal, while still in the `src` directory, run the following command:
+### 3.1. サーバーの起動
+1. ターミナルで、`src` ディレクトリにいる状態で、次のコマンドを実行します。
    ```sh
    java ChatServer <port>
    ```
-   Replace `<port>` with the port number you want the server to listen on (e.g., 8080).
-2. The server will start and display a message indicating it is waiting for clients.
+   `<port>` を、サーバーがリッスンするポート番号に置き換えてください（例：8080）。
+2. サーバーが起動し、クライアントを待機していることを示すメッセージが表示されます。
 
-### 3.2. Start the Client
-1. Open a new terminal or command prompt for each client you want to run.
-2. Navigate to the `src` directory.
+### 3.2. クライアントの起動
+1. 実行したいクライアントごとに、新しいターミナルまたはコマンドプロンプトを開きます。
+2. `src` ディレクトリに移動します。
    ```sh
    cd path/to/java-socket-chat/src
    ```
-3. Run the following command:
+3. 次のコマンドを実行します。
    ```sh
    java ChatClient <host> <port>
    ```
-   - Replace `<host>` with the IP address of the server (e.g., `127.0.0.1` if running on the same machine).
-   - Replace `<port>` with the same port number the server is using.
-4. After running the command, the client will prompt you to enter a nickname.
-5. Once you provide a nickname, you can start sending and receiving messages.
+   - `<host>` をサーバーのIPアドレスに置き換えてください（同じマシンで実行している場合は `127.0.0.1` など）。
+   - `<port>` をサーバーが使用しているのと同じポート番号に置き換えてください。
+4. コマンドを実行すると、クライアントはニックネームの入力を求めます。
+5. ニックネームを入力すると、メッセージの送受信を開始できます。
 
-## 4. How to Use
-- **Sending Messages**: Type your message in the client's console and press `Enter`.
-- **Receiving Messages**: Messages from other clients will appear in your console, prefixed with the sender's nickname.
-- **Exiting**: To disconnect a client, close its terminal window or press `Ctrl+C`.
+## 4. 使用方法
+- **メッセージの送信**: クライアントのコンソールにメッセージを入力し、`Enter` キーを押します。
+- **メッセージの受信**: 他のクライアントからのメッセージは、送信者のニックネームが前に付いてコンソールに表示されます。
+- **終了**: クライアントを切断するには、そのターミナルウィンドウを閉じるか、`Ctrl+C` を押します。

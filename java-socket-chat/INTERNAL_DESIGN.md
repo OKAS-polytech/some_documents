@@ -1,41 +1,41 @@
-# Internal Design Document
+# 内部設計書
 
-## 1. Class Structure
-The application is composed of three main classes: `ChatServer`, `ClientHandler`, and `ChatClient`.
+## 1. クラス構造
+本アプリケーションは、`ChatServer`、`ClientHandler`、`ChatClient` の3つの主要なクラスで構成されます。
 
-### 1.1. `ChatServer` Class
-- **Purpose**: Manages the server-side operations, including listening for client connections and maintaining a list of connected clients.
-- **Key Attributes**:
-  - `serverSocket`: A `ServerSocket` to accept client connections.
-  - `clientHandlers`: A list to store `ClientHandler` instances for each connected client.
-- **Key Methods**:
-  - `start(port)`: Starts the server on a specified port. It enters an infinite loop to accept new client connections.
-  - `broadcastMessage(message, sender)`: Sends a message to all connected clients except the original sender.
-  - `removeClient(clientHandler)`: Removes a client from the list when they disconnect.
+### 1.1. `ChatServer` クラス
+- **目的**: サーバー側の操作を管理します。クライアント接続のリッスンや、接続済みクライアントのリスト保持などが含まれます。
+- **主要な属性**:
+  - `serverSocket`: クライアント接続を受け入れるための `ServerSocket`。
+  - `clientHandlers`: 接続された各クライアントの `ClientHandler` インスタンスを格納するリスト。
+- **主要なメソッド**:
+  - `start(port)`: 指定されたポートでサーバーを開始します。新しいクライアント接続を受け入れるための無限ループに入ります。
+  - `broadcastMessage(message, sender)`: 元の送信者を除く、接続されているすべてのクライアントにメッセージを送信します。
+  - `removeClient(clientHandler)`: クライアントが切断した際に、リストからクライアントを削除します。
 
-### 1.2. `ClientHandler` Class (implements `Runnable`)
-- **Purpose**: A dedicated thread to handle communication with a single client. It reads messages from the client and passes them to the server for broadcasting.
-- **Key Attributes**:
-  - `socket`: The `Socket` connected to the client.
-  - `server`: A reference to the `ChatServer` instance.
-  - `in`: A `BufferedReader` to read messages from the client.
-  - `out`: A `PrintWriter` to send messages to the client.
-  - `nickname`: The client's chosen nickname.
-- **Key Methods**:
-  - `run()`: The main logic of the thread. It reads the client's nickname and then continuously listens for incoming messages until the client disconnects.
-  - `sendMessage(message)`: Sends a message to the client.
+### 1.2. `ClientHandler` クラス (`Runnable` を実装)
+- **目的**: 単一のクライアントとの通信を処理するための専用スレッドです。クライアントからメッセージを読み取り、ブロードキャストのためにサーバーに渡します。
+- **主要な属性**:
+  - `socket`: クライアントに接続されている `Socket`。
+  - `server`: `ChatServer` インスタンスへの参照。
+  - `in`: クライアントからメッセージを読み取るための `BufferedReader`。
+  - `out`: クライアントにメッセージを送信するための `PrintWriter`。
+  - `nickname`: クライアントが選択したニックネーム。
+- **主要なメソッド**:
+  - `run()`: スレッドのメインロジックです。クライアントのニックネームを読み取り、クライアントが切断するまで着信メッセージを継続的にリッスンします。
+  - `sendMessage(message)`: クライアントにメッセージを送信します。
 
-### 1.3. `ChatClient` Class
-- **Purpose**: Manages the client-side operations, including connecting to the server, sending user input, and receiving messages.
-- **Key Attributes**:
-  - `socket`: The `Socket` for connecting to the server.
-  - `in`: A `BufferedReader` to read messages from the server.
-  - `out`: A `PrintWriter` to send messages to the server.
-- **Key Methods**:
-  - `start(host, port)`: Connects to the server and starts two threads: one for reading user input from the console and another for reading messages from the server.
-  - `sendMessage()`: A method run in a thread to read console input and send it to the server.
-  - `receiveMessage()`: A method run in a thread to read messages from the server and display them on the console.
+### 1.3. `ChatClient` クラス
+- **目的**: クライアント側の操作を管理します。サーバーへの接続、ユーザー入力の送信、メッセージの受信などが含まれます。
+- **主要な属性**:
+  - `socket`: サーバーに接続するための `Socket`。
+  - `in`: サーバーからメッセージを読み取るための `BufferedReader`。
+  - `out`: サーバーにメッセージを送信するための `PrintWriter`。
+- **主要なメソッド**:
+  - `start(host, port)`: サーバーに接続し、2つのスレッドを開始します。1つはコンソールからのユーザー入力を読み取るため、もう1つはサーバーからのメッセージを読み取るためのものです。
+  - `sendMessage()`: コンソールの入力を読み取り、サーバーに送信するためにスレッドで実行されるメソッド。
+  - `receiveMessage()`: サーバーからのメッセージを読み取り、コンソールに表示するためにスレッドで実行されるメソッド。
 
-## 2. Threading Model
-- The `ChatServer` creates a new `ClientHandler` thread for each client that connects. This allows the server to handle multiple clients concurrently.
-- The `ChatClient` uses two threads: one for the main application flow and sending messages, and a separate thread to continuously listen for and display incoming messages from the server without blocking user input.
+## 2. スレッドモデル
+- `ChatServer` は、接続するクライアントごとに新しい `ClientHandler` スレッドを作成します。これにより、サーバーは複数のクライアントを同時に処理できます。
+- `ChatClient` は2つのスレッドを使用します。1つはメインのアプリケーションフローとメッセージ送信用、もう1つはユーザー入力をブロックすることなく、サーバーからの着信メッセージを継続的にリッスンして表示するための独立したスレッドです。

@@ -4,6 +4,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+/**
+ * 個々のクライアント接続を処理するためのスレッドです。
+ * クライアントからのメッセージを読み取り、サーバーにブロードキャストを依頼します。
+ */
 public class ClientHandler implements Runnable {
     private final Socket socket;
     private final ChatServer server;
@@ -11,20 +15,29 @@ public class ClientHandler implements Runnable {
     private BufferedReader in;
     private String nickname;
 
+    /**
+     * 新しいクライアントハンドラを初期化します。
+     * @param socket クライアントに接続されているソケット
+     * @param server ChatServerインスタンスへの参照
+     */
     public ClientHandler(Socket socket, ChatServer server) {
         this.socket = socket;
         this.server = server;
     }
 
+    /**
+     * スレッドのメインロジックです。
+     * クライアントのニックネームを読み取り、切断されるまでメッセージを継続的に待ち受けます。
+     */
     @Override
     public void run() {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
-            out.println("Enter your nickname:");
+            out.println("ニックネームを入力してください:");
             nickname = in.readLine();
-            server.broadcastMessage(nickname + " has joined the chat.", this);
+            server.broadcastMessage(nickname + " がチャットに参加しました。", this);
 
             String message;
             while ((message = in.readLine()) != null) {
@@ -32,7 +45,7 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (IOException e) {
-            // Connection reset is expected when a client disconnects
+            // クライアントが切断した際の接続リセットは想定内です
         } finally {
             server.removeClient(this);
             try {
@@ -43,10 +56,18 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * このクライアントにメッセージを送信します。
+     * @param message 送信するメッセージ
+     */
     void sendMessage(String message) {
         out.println(message);
     }
 
+    /**
+     * このクライアントのニックネームを取得します。
+     * @return クライアントのニックネーム
+     */
     public String getNickname() {
         return nickname;
     }
