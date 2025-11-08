@@ -13,7 +13,7 @@ public class ClientHandler implements Runnable {
     private final ChatServer server;
     private PrintWriter out;
     private BufferedReader in;
-    private String nickname;
+    protected String nickname; // テストでアクセスできるようprotectedに変更
 
     /**
      * 新しいクライアントハンドラを初期化します。
@@ -23,6 +23,17 @@ public class ClientHandler implements Runnable {
     public ClientHandler(Socket socket, ChatServer server) {
         this.socket = socket;
         this.server = server;
+    }
+
+    /**
+     * [テスト用] モックオブジェクトと共に使用するためのコンストラクタ。
+     * @param nickname このハンドラのニックネーム
+     * @param server ChatServerインスタンス
+     */
+    ClientHandler(String nickname, ChatServer server) {
+        this.socket = null; // 実際の通信はしないためnull
+        this.server = server;
+        this.nickname = nickname;
     }
 
     /**

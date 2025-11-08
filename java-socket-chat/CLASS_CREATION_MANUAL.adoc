@@ -1,0 +1,122 @@
+= クラス作成手順書 (テスト駆動開発)
+
+== 1. はじめに
+このドキュメントでは、本チャットアプリケーションの主要クラスである `ChatServer` と `ClientHandler` を、**テスト駆動開発（TDD）** のアプローチで開発する手順を解説します。
+
+TDDは、以下の3つのステップを繰り返す開発スタイルです。
+. **レッド**: まず失敗するテストコードを書きます。検証したい機能が存在しないため、このテストはコンパイラエラーになるか、実行時に失敗（レッド）します。
+. **グリーン**: テストが成功（グリーン）するように、最小限のプロダクトコードを実装します。
+. **リファクタリング**: コードの設計を改善します。テストが成功し続けることを確認しながら、コードをよりクリーンで効率的なものに修正します。
+
+== 2. テスト環境のセットアップ
+本プロジェクトの単体テストは **JUnit5** を使用します。テストコードをコンパイル・実行するには、ライブラリ（JARファイル）が必要です。
+
+. **ライブラリのダウンロード**:
+[Maven Centralリポジトリ](https://search.maven.org/artifact/org.junit.platform/junit-platform-console-standalone) から `junit-platform-console-standalone-X.X.X.jar` をダウンロードします。（例: `1.10.2`）
+. **配置**:
+ダウンロードしたJARファイルを、プロジェクトのルート（`java-socket-chat` フォルダと同じ階層）などに置きます。
+
+=== テストのコンパイルと実行コマンド
+テストコードのコンパイルと実行は、ダウンロードしたJARファイルをクラスパス（`-cp`）に含めて行います。
+
+.コンパイル
+[source,sh]
+----
+# ルートディレクトリで実行
+javac -d java-socket-chat/build -cp ".:junit-platform-console-standalone-1.10.2.jar" java-socket-chat/src/main/java/*.java java-socket-chat/src/test/java/*.java
+----
+*注*: 上記のコマンドでは、コンパイル結果（`.class` ファイル）を `java-socket-chat/build` ディレクトリに出力しています。
+
+.実行
+[source,sh]
+----
+# ルートディレクトリで実行
+java -jar junit-platform-console-standalone-1.10.2.jar --class-path "java-socket-chat/build" --scan-class-path
+----
+
+'''
+
+== 3. `ChatServer` クラスの開発
+
+=== ステップ 3.1: メッセージブロードキャスト機能
+==== レッド：失敗するテストを書く
+まず、`ChatServer` がメッセージを送信者以外のクライアントにブロードキャストできることを検証するテスト `testBroadcastMessage` を `ChatServerTest.java` に書きます。この時点では `ChatServer` クラスや `broadcastMessage` メソッドが存在しないため、コードはコンパイルエラーになります。
+
+[source,java]
+----
+// ChatServerTest.java
+@Test
+void testBroadcastMessage() {
+    // ... (ChatServerTest.javaに実装済みのコード)
+}
+----
+
+==== グリーン：テストを通す
+次に、`ChatServer.java` を作成し、`broadcastMessage` メソッドと、テストに必要なヘルパーメソッド（`addClientForTest` など）を実装します。テストが通る最小限の実装で構いません。
+
+[source,java]
+----
+// ChatServer.java
+public class ChatServer {
+    // ...
+    void broadcastMessage(String message, ClientHandler excludeUser) {
+        for (ClientHandler aUser : clientHandlers) {
+            if (aUser != excludeUser) {
+                aUser.sendMessage(message);
+            }
+        }
+    }
+    // ...
+}
+----
+
+==== リファクタリング：コードを改善する
+現在の実装はシンプルなので、特にリファクタリングは不要です。
+
+=== ステップ 3.2: クライアント削除機能
+同様に、`removeClient` メソッドのテストを先に書き、次に最小限の実装を行い、最後にコードを整理します。
+
+'''
+
+== 4. `ClientHandler` クラスの開発
+`ClientHandler` はネットワーク通信を行うため、テストでは実際のソケット通信を**モック（模擬）**に置き換える必要があります。
+
+=== ステップ 4.1: `run` メソッドの振る舞い
+==== レッド：失敗するテストを書く
+`MockSocket` と `MockChatServer` を準備し、`ClientHandler` の `run` メソッドがクライアントとの一連の対話（ニックネーム受信、メッセージ受信、切断処理）を正しく行うことを検証するテスト `testRun` を `ClientHandlerTest.java` に書きます。
+
+[source,java]
+----
+// ClientHandlerTest.java
+@Test
+void testRun() throws IOException {
+    // ... (ClientHandlerTest.javaに実装済みのコード)
+}
+----
+
+==== グリーン：テストを通す
+テストが成功するように、`ClientHandler.java` に `run` メソッドを実装します。`try-with-resources` や `finally` ブロックを使って、リソースが正しくクローズされるようにします。
+
+[source,java]
+----
+// ClientHandler.java
+public class ClientHandler implements Runnable {
+    @Override
+    public void run() {
+        // ... (ClientHandler.javaに実装済みのコード)
+    }
+}
+----
+
+==== リファクタリング：コードを改善する
+`run` メソッド内のロジックが複雑な場合は、プライベートメソッドに切り出すなどのリファクタリングを検討しますが、今回は不要です。
+
+'''
+
+== 5. 単体テストが難しいクラス
+`ChatClient` と `Main` は、標準入出力（ユーザーのキーボード入力）や実際のネットワークI/Oに強く依存しています。これらの動作を単体テストで完全に模倣するのは複雑であり、効果的ではありません。
+
+- `Main`: ユーザーの選択に応じて他のクラスの `main` メソッドを呼び出すだけのシンプルなロジックであり、単体テストの恩恵は少ないです。
+- `ChatClient`: サーバーとの通信とコンソールI/Oが絡み合うため、単体テストよりも、実際にサーバーを起動して全体を動かす**統合テスト**や**手動テスト**の方が適しています。
+
+そのため、これらのクラスについては単体テストを作成せず、手動での動作確認をもって品質を担保します。

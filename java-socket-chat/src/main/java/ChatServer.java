@@ -78,4 +78,22 @@ public class ChatServer {
         clientHandlers.remove(aUser);
         System.out.println("クライアントが切断しました: " + aUser.getNickname());
     }
+
+    // --- 以下はテスト用のヘルパーメソッド ---
+
+    /**
+     * [テスト用] 指定されたクライアントハンドラをリストに追加します。
+     * @param clientHandler 追加するクライアントハンドラ
+     */
+    void addClientForTest(ClientHandler clientHandler) {
+        this.clientHandlers.add(clientHandler);
+    }
+
+    /**
+     * [テスト用] 現在接続しているクライアントの数を返します。
+     * @return クライアントの数
+     */
+    int getClientCountForTest() {
+        return this.clientHandlers.size();
+    }
 }
