@@ -1,0 +1,5 @@
+com/example/ftp/server/ClientHandler.class
+com/example/ftp/server/Server.class
+com/example/ftp/gui/ServerFrame.class
+com/example/ftp/gui/ClientFrame.class
+com/example/ftp/client/Client.class
