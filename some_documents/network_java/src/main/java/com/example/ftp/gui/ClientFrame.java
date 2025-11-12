@@ -67,7 +67,8 @@ public class ClientFrame extends JFrame {
         JPanel messagePanel = new JPanel(new BorderLayout());
         messageField = new JTextField();
         messagePanel.add(messageField, BorderLayout.CENTER);
-        messagePanel.add(new JButton("Send"), BorderLayout.EAST);
+        JButton sendButton = new JButton("Send");
+        messagePanel.add(sendButton, BorderLayout.EAST);
         chatPanel.add(messagePanel, BorderLayout.SOUTH);
         splitPane.setRightComponent(chatPanel);
         add(splitPane, BorderLayout.CENTER);
@@ -75,7 +76,18 @@ public class ClientFrame extends JFrame {
         // --- アクションリスナー ---
         connectButton.addActionListener(e -> connectToServer());
         disconnectButton.addActionListener(e -> disconnectFromServer());
+        sendButton.addActionListener(e -> sendMessage());
+        messageField.addActionListener(e -> sendMessage()); // Enterキーでも送信
+    }
 
+    private void sendMessage() {
+        String message = messageField.getText();
+        if (client != null && !message.isEmpty()) {
+            client.sendMessage("MSG:" + message);
+            // 自分の画面にもメッセージを表示
+            log("[You]: " + message);
+            messageField.setText("");
+        }
     }
 
     private void connectToServer() {
@@ -84,6 +96,10 @@ public class ClientFrame extends JFrame {
             int port = Integer.parseInt(portField.getText());
             client = new Client();
             client.connect(ip, port);
+
+            // サーバーからのメッセージ受信を開始
+            client.startListening(this::log);
+
             log("Connected to server.");
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
@@ -109,7 +125,13 @@ public class ClientFrame extends JFrame {
     }
 
     private void log(String message) {
-        SwingUtilities.invokeLater(() -> chatArea.append(message + "\n"));
+        if (message.startsWith("BROADCAST:")) {
+            // "BROADCAST:[user]:message" -> "[user]:message"
+            String parsedMessage = message.substring("BROADCAST:".length());
+            SwingUtilities.invokeLater(() -> chatArea.append(parsedMessage + "\n"));
+        } else {
+            SwingUtilities.invokeLater(() -> chatArea.append("[System]: " + message + "\n"));
+        }
     }
 
     public static void main(String[] args) {
