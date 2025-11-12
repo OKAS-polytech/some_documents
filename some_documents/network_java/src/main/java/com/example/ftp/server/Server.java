@@ -16,6 +16,15 @@ public class Server {
     private volatile boolean isRunning = false;
     private List<ClientHandler> clients = Collections.synchronizedList(new ArrayList<>());
     private java.util.function.Consumer<String> logger = System.out::println;
+    private String sharedDirectory = "shared"; // デフォルトの共有ディレクトリ
+
+    public void setSharedDirectory(String path) {
+        this.sharedDirectory = path;
+    }
+
+    public String getSharedDirectory() {
+        return sharedDirectory;
+    }
 
     public void setLogger(java.util.function.Consumer<String> logger) {
         this.logger = logger;
