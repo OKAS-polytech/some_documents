@@ -13,6 +13,7 @@ public class ClientFrame extends JFrame {
     private final JTextField usernameField;
     private final JButton connectButton;
     private final JButton disconnectButton;
+    private final DefaultListModel<String> fileListModel;
     private final JList<String> fileList;
     private final JTextArea chatArea;
     private final JTextField messageField;
@@ -50,13 +51,20 @@ public class ClientFrame extends JFrame {
         // ファイル一覧
         JPanel filePanel = new JPanel(new BorderLayout());
         filePanel.add(new JLabel("Server Files:"), BorderLayout.NORTH);
-        fileList = new JList<>();
+        fileListModel = new DefaultListModel<>();
+        fileList = new JList<>(fileListModel);
         filePanel.add(new JScrollPane(fileList), BorderLayout.CENTER);
         JPanel fileButtons = new JPanel();
-        fileButtons.add(new JButton("Upload"));
-        fileButtons.add(new JButton("Download"));
+        JButton uploadButton = new JButton("Upload");
+        JButton downloadButton = new JButton("Download");
+        fileButtons.add(uploadButton);
+        fileButtons.add(downloadButton);
         filePanel.add(fileButtons, BorderLayout.SOUTH);
         splitPane.setLeftComponent(filePanel);
+
+        // --- アクションリスナーの追加 ---
+        uploadButton.addActionListener(e -> uploadFile());
+        downloadButton.addActionListener(e -> downloadFile());
 
         // チャット
         JPanel chatPanel = new JPanel(new BorderLayout());
@@ -80,6 +88,58 @@ public class ClientFrame extends JFrame {
         messageField.addActionListener(e -> sendMessage()); // Enterキーでも送信
     }
 
+    private void downloadFile() {
+        String selectedFile = fileList.getSelectedValue();
+        if (client == null || selectedFile == null) {
+            JOptionPane.showMessageDialog(this, "No file selected or not connected.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a directory to save");
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File selectedDir = fileChooser.getSelectedFile();
+            new Thread(() -> {
+                try {
+                    log("Downloading file: " + selectedFile);
+                    client.downloadFile(selectedFile, selectedDir.getAbsolutePath());
+                    log("File download complete.");
+                } catch (IOException e) {
+                    log("File download failed: " + e.getMessage());
+                    JOptionPane.showMessageDialog(this, "File download failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }).start();
+        }
+    }
+
+    private void uploadFile() {
+        if (client == null) {
+            JOptionPane.showMessageDialog(this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            new Thread(() -> {
+                try {
+                    log("Uploading file: " + selectedFile.getName());
+                    client.uploadFile(selectedFile.getAbsolutePath());
+                    log("File upload complete.");
+                    // ファイル一覧を更新
+                    client.sendMessage("LIST");
+                } catch (IOException e) {
+                    log("File upload failed: " + e.getMessage());
+                    JOptionPane.showMessageDialog(this, "File upload failed: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }).start();
+        }
+    }
+
     private void sendMessage() {
         String message = messageField.getText();
         if (client != null && !message.isEmpty()) {
@@ -98,11 +158,15 @@ public class ClientFrame extends JFrame {
             client.connect(ip, port);
 
             // サーバーからのメッセージ受信を開始
-            client.startListening(this::log);
+            client.startListening(this::handleServerMessage);
 
             log("Connected to server.");
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
+
+            // 接続したらファイル一覧を要求
+            client.sendMessage("LIST");
+
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Invalid port number.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException ex) {
@@ -124,14 +188,35 @@ public class ClientFrame extends JFrame {
         }
     }
 
-    private void log(String message) {
+    private void handleServerMessage(String message) {
         if (message.startsWith("BROADCAST:")) {
-            // "BROADCAST:[user]:message" -> "[user]:message"
             String parsedMessage = message.substring("BROADCAST:".length());
-            SwingUtilities.invokeLater(() -> chatArea.append(parsedMessage + "\n"));
+            logToChat(parsedMessage);
+        } else if (message.startsWith("FILE_LIST:")) {
+            String fileData = message.substring("FILE_LIST:".length());
+            updateFileList(fileData.split(","));
         } else {
-            SwingUtilities.invokeLater(() -> chatArea.append("[System]: " + message + "\n"));
+            logToChat("[System]: " + message);
         }
+    }
+
+    private void updateFileList(String[] files) {
+        SwingUtilities.invokeLater(() -> {
+            fileListModel.clear();
+            for (String file : files) {
+                if (!file.isEmpty()) {
+                    fileListModel.addElement(file);
+                }
+            }
+        });
+    }
+
+    private void logToChat(String message) {
+        SwingUtilities.invokeLater(() -> chatArea.append(message + "\n"));
+    }
+
+    private void log(String message) {
+        SwingUtilities.invokeLater(() -> chatArea.append("[System]: " + message + "\n"));
     }
 
     public static void main(String[] args) {
