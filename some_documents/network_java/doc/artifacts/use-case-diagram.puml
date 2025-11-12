@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+actor "ユーザー" as user
+actor "管理者" as admin
+
+rectangle "FTPツール" {
+  usecase "サーバーに接続する" as UC_CONNECT
+  usecase "ファイルをアップロードする" as UC_UPLOAD
+  usecase "ファイルをダウンロードする" as UC_DOWNLOAD
+  usecase "チャットメッセージを送信する" as UC_CHAT_SEND
+  usecase "ファイル一覧を表示する" as UC_LIST_FILES
+
+  usecase "サーバーを起動する" as UC_START_SERVER
+  usecase "接続クライアントを監視する" as UC_MONITOR
+  usecase "ログを確認する" as UC_VIEW_LOG
+}
+
+user -- UC_CONNECT
+user -- UC_UPLOAD
+user -- UC_DOWNLOAD
+user -- UC_CHAT_SEND
+user -- UC_LIST_FILES
+
+admin -- UC_START_SERVER
+admin -- UC_MONITOR
+admin -- UC_VIEW_LOG
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+state "未接続" as NotConnected
+state "接続中" as Connected
+
+[*] --> NotConnected
+
+NotConnected --> Connected : 接続ボタンクリック\n(IP, Port, ユーザー名入力)
+Connected --> NotConnected : 切断ボタンクリック
+
+state Connected {
+  state "ファイル一覧表示" as FileList
+  state "チャット" as Chat
+
+  [*] --> FileList
+  FileList --> Chat : チャット送信
+  Chat --> FileList : ファイル操作
+}
+@enduml
