@@ -1,3 +1,4 @@
+com/example/ftp/Main.class
 com/example/ftp/server/ClientHandler.class
 com/example/ftp/server/Server.class
 com/example/ftp/gui/ServerFrame.class
