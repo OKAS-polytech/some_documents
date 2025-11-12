@@ -57,6 +57,7 @@ public class ServerFrame extends JFrame {
         try {
             int port = Integer.parseInt(portField.getText());
             server = new Server();
+            server.setLogger(this::log); // サーバーのログ出力先をGUIに設定
             serverThread = new Thread(() -> {
                 try {
                     server.start(port);
