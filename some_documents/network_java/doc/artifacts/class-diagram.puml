@@ -1,0 +1,60 @@
+@startuml
+
+package "com.example.ftp.server" {
+  class Server {
+    - serverSocket: ServerSocket
+    + main(String[] args)
+    + startServer(int port)
+  }
+  class ClientHandler implements Runnable {
+    - socket: Socket
+    - in: BufferedReader
+    - out: PrintWriter
+    + run()
+    - handleCommand(String command)
+  }
+  Server "1" *-- "0..*" ClientHandler : creates
+}
+
+package "com.example.ftp.client" {
+  class Client {
+    - socket: Socket
+    - in: BufferedReader
+    - out: PrintWriter
+    + main(String[] args)
+    + connect(String ip, int port)
+    + sendCommand(String command)
+    + receiveMessage(): String
+  }
+}
+
+package "com.example.ftp.gui" {
+  class ServerFrame extends JFrame {
+    - logArea: JTextArea
+    - clientList: JList
+    + updateLog(String message)
+  }
+  class ClientFrame extends JFrame {
+    - fileList: JList
+    - chatArea: JTextArea
+    - uploadButton: JButton
+    - downloadButton: JButton
+    + updateFileList(String[] files)
+    + appendChatMessage(String message)
+  }
+}
+
+package "com.example.ftp.chat" {
+  class ChatMessage {
+    - sender: String
+    - message: String
+    - timestamp: Date
+  }
+}
+
+Client -- ClientFrame
+Server -- ServerFrame
+ClientHandler ..> ChatMessage : uses
+Client ..> ChatMessage : uses
+
+@enduml
